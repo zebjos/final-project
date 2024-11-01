@@ -17,25 +17,30 @@ import androidx.navigation.compose.rememberNavController
 import com.example.final_project.data.Routes
 import com.example.final_project.screens.LobbyScreen
 import com.example.final_project.screens.StartScreen
-import com.example.final_project.ui.theme.FinalprojectTheme
+import com.example.final_project.ui.theme.AppTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         setContent {
-            val navController = rememberNavController()
+            AppTheme {
+                val navController = rememberNavController()
 
-            NavHost(navController = navController, startDestination = Routes.StartScreen, builder = {
+                NavHost(
+                    navController = navController,
+                    startDestination = Routes.StartScreen,
+                    builder = {
 
-                composable(Routes.StartScreen){
-                    StartScreen(navController)
-                }
+                        composable(Routes.StartScreen) {
+                            StartScreen(navController)
+                        }
 
-                composable(Routes.LobbyScreen){
-                    LobbyScreen(navController)
-                }
-            })
+                        composable(Routes.LobbyScreen) {
+                            LobbyScreen(navController)
+                        }
+                    })
+            }
         }
     }
 }
