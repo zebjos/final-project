@@ -26,6 +26,8 @@ class GameViewModel : ViewModel() {
     fun createOnlineGame() {
         myID = "X" // The creator of the game will be "X"
 
+        println("Player created the game. myID is: $myID") // Trying to debug myID
+
         // Generate a unique game ID
         val newGameId = Random.nextInt(1000..9999).toString()
 
@@ -52,6 +54,8 @@ class GameViewModel : ViewModel() {
     // Function to join an existing online game
     fun joinOnlineGame(gameId: String) {
         myID = "O" // The joining player will be "O"
+
+        println("Player joined the game. myID is: $myID") // Trying to debug myID
 
         // Fetch the game data from Realtime Database
         database.getReference("games")
@@ -97,19 +101,14 @@ class GameViewModel : ViewModel() {
     // Function to fetch the game model from Realtime Database
     fun fetchGameModel(gameId: String) {
         if (gameId != "-1") {
-            database.getReference("games")
+            FirebaseDatabase.getInstance().getReference("games")
                 .child(gameId)
                 .addValueEventListener(object : ValueEventListener {
                     override fun onDataChange(snapshot: DataSnapshot) {
                         val model = snapshot.getValue(GameModel::class.java)
-                        _gameModel.postValue(model)
-
-                        // Automatically start the game if both players are ready
-                        if (model != null && model.gameStatus == GameStatus.JOINED) {
-                            startGame()
+                        if (model != null) {
+                            _gameModel.postValue(model) // Update the game model with real-time data
                         }
-
-                        println("Fetched game model: $model")
                     }
 
                     override fun onCancelled(error: DatabaseError) {
@@ -131,50 +130,50 @@ class GameViewModel : ViewModel() {
     // Function to handle cell clicks in the game
     fun onCellClicked(index: Int) {
         _gameModel.value?.let { model ->
+            // Check if the game is in progress
             if (model.gameStatus != GameStatus.INPROGRESS) return
 
-            // Check if it's the player's turn
+            // Check if it's the current player's turn
             if (model.gameId != "-1" && model.currentPlayer != myID) return
 
+            // Make the move only if the cell is empty
             if (model.filledPos[index].isEmpty()) {
                 model.filledPos[index] = model.currentPlayer
+
+                // Optimistically switch turns locally
                 model.currentPlayer = if (model.currentPlayer == "X") "O" else "X"
-                checkForWinner(model)
+
+                // Save the updated game state to Firebase
                 saveGameModel(model)
-                println("Cell clicked at index: $index, updated model: $model")
+
+                // Check for a winner or a draw after making a move
+                checkForWinner(model)
             }
         }
     }
 
-    // Function to check for a winner
     private fun checkForWinner(model: GameModel) {
-        val winningPos = arrayOf(
-            intArrayOf(0, 1, 2),
-            intArrayOf(3, 4, 5),
-            intArrayOf(6, 7, 8),
-            intArrayOf(0, 3, 6),
-            intArrayOf(1, 4, 7),
-            intArrayOf(2, 5, 8),
-            intArrayOf(0, 4, 8),
-            intArrayOf(2, 4, 6)
+        val winningPositions = arrayOf(
+            intArrayOf(0, 1, 2), intArrayOf(3, 4, 5), intArrayOf(6, 7, 8),
+            intArrayOf(0, 3, 6), intArrayOf(1, 4, 7), intArrayOf(2, 5, 8),
+            intArrayOf(0, 4, 8), intArrayOf(2, 4, 6)
         )
 
-        for (pos in winningPos) {
-            if (model.filledPos[pos[0]] == model.filledPos[pos[1]] &&
-                model.filledPos[pos[1]] == model.filledPos[pos[2]] &&
-                model.filledPos[pos[0]].isNotEmpty()
+        for (positions in winningPositions) {
+            if (model.filledPos[positions[0]] == model.filledPos[positions[1]] &&
+                model.filledPos[positions[1]] == model.filledPos[positions[2]] &&
+                model.filledPos[positions[0]].isNotEmpty()
             ) {
                 model.gameStatus = GameStatus.FINISHED
-                model.winner = model.filledPos[pos[0]]
-                println("Winner found: ${model.winner}")
+                model.winner = model.filledPos[positions[0]]
+                saveGameModel(model) // Save the winning state immediately
                 return
             }
         }
 
-        // Check for a draw
         if (model.filledPos.none { it.isEmpty() }) {
             model.gameStatus = GameStatus.FINISHED
-            println("Game ended in a draw.")
+            saveGameModel(model) // Save the draw state immediately
         }
     }
 }
