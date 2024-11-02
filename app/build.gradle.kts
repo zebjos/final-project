@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -40,6 +41,13 @@ android {
 }
 
 dependencies {
+    // Import the Firebase BoM
+
+    implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
+
+    implementation("com.google.firebase:firebase-auth")
+
+    implementation("com.google.firebase:firebase-database")
 
     implementation("androidx.compose.ui:ui-text-google-fonts:1.7.3")
 
@@ -53,6 +61,8 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.ui.text.google.fonts)
+    implementation(libs.firebase.database.ktx)
+    implementation(libs.firebase.auth.ktx)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

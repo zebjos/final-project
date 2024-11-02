@@ -35,17 +35,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.example.final_project.components.TopBar
+import com.example.final_project.data.Player
 import com.example.final_project.data.Routes
+import com.example.final_project.firebase.FirebaseActions
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 
 @Composable
 fun StartScreen(navController: NavController) {
     var name by remember { mutableStateOf("") }
-    val isValid = true //name.length in 3..20
+    val isValid = name.isNotBlank()
+
+    // Initialize Firebase Auth
+    val auth = FirebaseAuth.getInstance()
 
     Scaffold(
-        topBar = { TopBar() }  // Use the reusable TopBar here
+        topBar = { TopBar() }
     ) { innerPadding ->
-        // Content of the StartScreen
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
@@ -62,10 +68,29 @@ fun StartScreen(navController: NavController) {
             )
             FilledTonalButton(onClick = {
                 if (isValid) {
-                    navController.navigate(Routes.LobbyScreen)
+                    // Sign in anonymously
+                    auth.signInAnonymously()
+                        .addOnCompleteListener { task ->
+                            if (task.isSuccessful) {
+                                // Sign-in success
+                                val user = auth.currentUser
+                                val userId = user?.uid ?: return@addOnCompleteListener
+
+                                // Create a Player object with uid and name
+                                val player = Player(uid = userId, name = name)
+
+                                // Proceed with adding player to the lobby
+                                FirebaseActions.addPlayerToLobby(
+                                    player = player,
+                                    onSuccess = {
+                                        navController.navigate(Routes.LobbyScreen)
+                                    }
+                                )
+                            }
+                        }
                 }
             }) {
-                Text("Join Lobby", style = MaterialTheme.typography.bodyLarge)
+                Text("Join Lobby")
             }
         }
     }

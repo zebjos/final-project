@@ -42,7 +42,7 @@ fun TopBar() {
                     imageVector = Icons.Default.Share, // Gaming controller icon
                     contentDescription = "Share Icon",
                     tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(start = 8.dp) // Add padding if needed
+                    modifier = Modifier.padding(start = 8.dp)
                 )
             }
         }
