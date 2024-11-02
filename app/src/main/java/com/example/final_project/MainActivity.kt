@@ -15,6 +15,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.final_project.data.Routes
+import com.example.final_project.screens.GameScreen
 import com.example.final_project.screens.LobbyScreen
 import com.example.final_project.screens.StartScreen
 import com.example.final_project.ui.theme.AppTheme
@@ -39,6 +40,11 @@ class MainActivity : ComponentActivity() {
                         composable(Routes.LobbyScreen) {
                             LobbyScreen(navController)
                         }
+
+                        composable("gameScreen") {
+                            GameScreen()
+                        }
+
                     })
             }
         }
