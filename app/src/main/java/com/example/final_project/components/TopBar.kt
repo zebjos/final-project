@@ -33,7 +33,7 @@ fun TopBar() {
                 horizontalArrangement = androidx.compose.foundation.layout.Arrangement.Center
             ) {
                 Text(
-                    "Multiplayer Connect Four",
+                    "Multiplayer Tic Tac Toe",
                     color = MaterialTheme.colorScheme.primary,
                     style = MaterialTheme.typography.bodyLarge,
                     fontSize = 25.sp
