@@ -22,11 +22,14 @@ class GameViewModel : ViewModel() {
     // Initialize Firebase Realtime Database
     private val database = FirebaseDatabase.getInstance()
 
-    // Function to create a new online game
-    fun createOnlineGame() {
-        myID = "X" // The creator of the game will be "X"
+    // LiveData for the list of games with status CREATED
+    private val _createdGames = MutableLiveData<List<GameModel>>()
+    val createdGames: LiveData<List<GameModel>> = _createdGames
 
-        println("Player created the game. myID is: $myID") // Trying to debug myID
+    // Function to create a new online game
+    // In GameViewModel
+    fun createOnlineGame(onGameCreated: (String, String) -> Unit) {
+        myID = "X" // The creator of the game will be "X"
 
         // Generate a unique game ID
         val newGameId = Random.nextInt(1000..9999).toString()
@@ -42,12 +45,16 @@ class GameViewModel : ViewModel() {
         database.getReference("games")
             .child(newGameId)
             .setValue(newGameModel)
-            .addOnSuccessListener {
-                _gameModel.postValue(newGameModel) // Update the LiveData
-                println("Game model saved successfully with ID: $newGameId")
-            }
-            .addOnFailureListener { e ->
-                println("Error saving game model: ${e.message}")
+            .addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    _gameModel.postValue(newGameModel) // Update the LiveData
+                    println("Game model saved successfully with ID: $newGameId")
+
+                    // Invoke the callback with the gameId and myID
+                    onGameCreated(newGameId, myID)
+                } else {
+                    println("Error saving game model: ${task.exception?.message}")
+                }
             }
     }
 
@@ -175,5 +182,28 @@ class GameViewModel : ViewModel() {
             model.gameStatus = GameStatus.FINISHED
             saveGameModel(model) // Save the draw state immediately
         }
+    }
+
+    // Function to fetch games with status CREATED to be displayed in the LobbyScreen
+    fun fetchCreatedGames() {
+        database.getReference("games")
+            .orderByChild("gameStatus")
+            .equalTo(GameStatus.CREATED.toString())
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    val games = mutableListOf<GameModel>()
+                    snapshot.children.forEach { child ->
+                        val game = child.getValue(GameModel::class.java)
+                        if (game != null) {
+                            games.add(game)
+                        }
+                    }
+                    _createdGames.postValue(games)
+                }
+
+                override fun onCancelled(error: DatabaseError) {
+                    println("Error fetching created games: ${error.message}")
+                }
+            })
     }
 }

@@ -49,7 +49,7 @@ fun StartScreen(navController: NavController) {
             OutlinedButton(onClick = {
                 navController.navigate(Routes.LobbyScreen)
             }) {
-                Text("Lobby")
+                Text("Browse Lobbies")
             }
             // Input field for GameID
             OutlinedTextField(
@@ -80,10 +80,8 @@ fun StartScreen(navController: NavController) {
 
             // Button to create a new lobby
             ElevatedButton(onClick = {
-                gameViewModel.createOnlineGame()
-                gameViewModel.gameModel.value?.let { gameModel ->
-                    val gameId = gameModel.gameId
-                    val myID = gameViewModel.myID // Get the myID from GameViewModel
+                gameViewModel.createOnlineGame { gameId, myID ->
+                    // Navigate to GameScreen only after the game has been created
                     navController.navigate("${Routes.GameScreen}/$gameId/$myID")
                 }
             }) {
