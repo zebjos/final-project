@@ -47,6 +47,9 @@ dependencies {
 
     implementation("com.google.firebase:firebase-auth")
 
+    // Firebase Firestore
+    implementation("com.google.firebase:firebase-firestore-ktx")
+
     implementation("com.google.firebase:firebase-database")
 
     implementation("androidx.compose.ui:ui-text-google-fonts:1.7.3")
@@ -64,6 +67,8 @@ dependencies {
     implementation(libs.firebase.database.ktx)
     implementation(libs.firebase.auth.ktx)
     implementation(libs.androidx.runtime.livedata)
+    implementation(libs.firebase.firestore.ktx)
+    implementation(libs.firebase.firestore)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
