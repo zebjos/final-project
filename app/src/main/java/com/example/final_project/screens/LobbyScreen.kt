@@ -26,7 +26,7 @@ fun LobbyScreen(navController: NavController){
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-            Text("list of players in the server/lobby")
+            Text("list of game lobbies")
         }
     }
 
