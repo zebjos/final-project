@@ -10,7 +10,7 @@ data class GameModel (
     var currentPlayer : String = (arrayOf("X","O"))[Random.nextInt(2)]
 )
 
-
+// Allowing only valid, predefiend value
 enum class GameStatus{
     CREATED,
     JOINED,
