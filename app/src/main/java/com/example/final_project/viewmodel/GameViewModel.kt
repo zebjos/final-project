@@ -27,7 +27,6 @@ class GameViewModel : ViewModel() {
     val createdGames: LiveData<List<GameModel>> = _createdGames
 
     // Function to create a new online game
-    // In GameViewModel
     fun createOnlineGame(onGameCreated: (String, String) -> Unit) {
         myID = "X" // The creator of the game will be "X"
 
@@ -65,11 +64,11 @@ class GameViewModel : ViewModel() {
         println("Player joined the game. myID is: $myID") // Trying to debug myID
 
         // Fetch the game data from Realtime Database
-        database.getReference("games")
+        database.getReference("games") // Like a table in SQL
             .child(gameId)
-            .get()
+            .get() // Like a select statement in SQL -> snapshot is the Return
             .addOnSuccessListener { snapshot ->
-                val model = snapshot.getValue(GameModel::class.java)
+                val model = snapshot.getValue(GameModel::class.java) // deserialize into a GameModel object
                 if (model != null) {
                     model.gameStatus = GameStatus.JOINED
                     saveGameModel(model) // Save the updated game model
@@ -92,37 +91,34 @@ class GameViewModel : ViewModel() {
     // Function to save the game model to Realtime Database
     fun saveGameModel(model: GameModel) {
         _gameModel.value = model
-        if (model.gameId != "-1") {
-            database.getReference("games")
-                .child(model.gameId)
-                .setValue(model)
-                .addOnSuccessListener {
-                    println("Game model updated successfully with ID: ${model.gameId}")
-                }
-                .addOnFailureListener { e ->
-                    println("Error updating game model: ${e.message}")
-                }
-        }
+        database.getReference("games")
+            .child(model.gameId)
+            .setValue(model)
+            .addOnSuccessListener {
+                println("Game model updated successfully with ID: ${model.gameId}")
+            }
+            .addOnFailureListener { e ->
+                println("Error updating game model: ${e.message}")
+            }
     }
 
     // Function to fetch the game model from Realtime Database
     fun fetchGameModel(gameId: String) {
-        if (gameId != "-1") {
-            FirebaseDatabase.getInstance().getReference("games")
-                .child(gameId)
-                .addValueEventListener(object : ValueEventListener {
-                    override fun onDataChange(snapshot: DataSnapshot) {
-                        val model = snapshot.getValue(GameModel::class.java)
-                        if (model != null) {
-                            _gameModel.postValue(model) // Update the game model with real-time data
-                        }
+        FirebaseDatabase.getInstance().getReference("games")
+            .child(gameId)
+            .addValueEventListener(object : ValueEventListener {
+                // Overriding the predefined functions
+                override fun onDataChange(snapshot: DataSnapshot) { // Triggered at the reference and when data changes
+                    val model = snapshot.getValue(GameModel::class.java) // Convert/deserialize the data to GameModel object
+                    if (model != null) { // If the convert was successful
+                        _gameModel.postValue(model) // Update the game model with real-time data
                     }
+                }
 
-                    override fun onCancelled(error: DatabaseError) {
-                        println("Error fetching game model: ${error.message}")
-                    }
-                })
-        }
+                override fun onCancelled(error: DatabaseError) {
+                    println("Error fetching game model: ${error.message}")
+                }
+            })
     }
 
     // Function to start the game (set status to INPROGRESS)

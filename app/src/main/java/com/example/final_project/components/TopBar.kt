@@ -39,7 +39,7 @@ fun TopBar() {
                     fontSize = 25.sp
                 )
                 Icon(
-                    imageVector = Icons.Default.Share, // Gaming controller icon
+                    imageVector = Icons.Default.Share, // Share controller icon
                     contentDescription = "Share Icon",
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(start = 8.dp)
